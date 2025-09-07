@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Universe Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .prompt-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .prompt-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .ai-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .ai-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ai-checkbox:hover {
+            background: #e8e8e8;
+            transform: translateX(5px);
+        }
+
+        .ai-checkbox input {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .ai-checkbox label {
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ai-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .ai-result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .ai-result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .ai-name {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .ai-rating {
+            display: flex;
+            gap: 3px;
+        }
+
+        .star {
+            color: #ffd700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .response-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .response-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .response-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .response-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .response-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #888;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        .copy-btn {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .comparison-tools {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .comparison-tools h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .prompt-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Universe Dashboard</h1>
+            <p>Compare responses from multiple AI models simultaneously</p>
+        </div>
+
+        <div class="input-section">
+            <div class="prompt-container">
+                <input type="text" class="prompt-input" id="promptInput" 
+                       placeholder="Enter your prompt here... (e.g., 'Explain quantum computing in simple terms')">
+                <button class="submit-btn" onclick="submitPrompt()">
+                    Compare AIs
+                </button>
+            </div>
+
+            <div class="ai-selection">
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="gpt4" checked>
+                    <label for="gpt4">
+                        GPT-4 <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="claude" checked>
+                    <label for="claude">
+                        Claude 3 <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="gemini" checked>
+                    <label for="gemini">
+                        Gemini Pro <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="llama" checked>
+                    <label for="llama">
+                        Llama 3 <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="mistral" checked>
+                    <label for="mistral">
+                        Mistral <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="perplexity" checked>
+                    <label for="perplexity">
+                        Perplexity <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="cohere" checked>
+                    <label for="cohere">
+                        Cohere <span class="ai-status"></span>
+                    </label>
+                </div>
+                <div class="ai-checkbox">
+                    <input type="checkbox" id="palm" checked>
+                    <label for="palm">
+                        PaLM 2 <span class="ai-status"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <p>Querying AI models... This may take a moment.</p>
+        </div>
+
+        <div class="results-section" id="resultsSection"></div>
+
+        <div class="comparison-tools" id="comparisonTools" style="display: none;">
+            <h3>Quick Filters</h3>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterResults('all')">All Results</button>
+                <button class="filter-btn" onclick="filterResults('fastest')">Fastest Response</button>
+                <button class="filter-btn" onclick="filterResults('detailed')">Most Detailed</button>
+                <button class="filter-btn" onclick="filterResults('concise')">Most Concise</button>
+                <button class="filter-btn" onclick="sortByRating()">Highest Rated</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store results for filtering
+        let allResults = [];
+
+        // Simulated AI responses (in a real implementation, these would come from API calls)
+        const aiResponses = {
+            gpt4: {
+                name: "GPT-4",
+                generateResponse: (prompt) => `GPT-4 Analysis: ${prompt}\n\nThis is a comprehensive response from GPT-4. The model excels at understanding context and providing detailed, nuanced answers. It can handle complex reasoning tasks and maintains consistency throughout long conversations. The response includes multiple perspectives and considers various implications of the query.`,
+                responseTime: () => Math.random() * 2000 + 1000
+            },
+            claude: {
+                name: "Claude 3",
+                generateResponse: (prompt) => `Claude's Perspective on: ${prompt}\n\nAs Claude, I'll provide a thoughtful and balanced response. I focus on being helpful, harmless, and honest. This response emphasizes clarity and practical applications while maintaining ethical considerations. I aim to be thorough yet accessible in my explanations.`,
+                responseTime: () => Math.random() * 2000 + 800
+            },
+            gemini: {
+                name: "Gemini Pro",
+                generateResponse: (prompt) => `Gemini Pro Response for: ${prompt}\n\nGoogle's Gemini provides multimodal understanding with strong performance across various tasks. This response leverages advanced reasoning capabilities and up-to-date information. The model excels at technical explanations and creative problem-solving.`,
+                responseTime: () => Math.random() * 1800 + 900
+            },
+            llama: {
+                name: "Llama 3",
+                generateResponse: (prompt) => `Llama 3 Output: ${prompt}\n\nMeta's Llama 3 offers open-source excellence with strong performance. This response demonstrates efficient processing and comprehensive understanding. The model provides reliable results across diverse domains while being resource-efficient.`,
+                responseTime: () => Math.random() * 1500 + 700
+            },
+            mistral: {
+                name: "Mistral",
+                generateResponse: (prompt) => `Mistral Analysis: ${prompt}\n\nMistral provides efficient and accurate responses with a focus on performance. This lightweight yet powerful model delivers quality results quickly. It excels at instruction following and maintains good coherence in responses.`,
+                responseTime: () => Math.random() * 1200 + 600
+            },
+            perplexity: {
+                name: "Perplexity",
+                generateResponse: (prompt) => `Perplexity Search Result for: ${prompt}\n\nPerplexity combines AI with real-time web search for accurate, up-to-date information. This response includes verified facts and citations from reliable sources. The model excels at research-oriented queries and fact-checking.`,
+                responseTime: () => Math.random() * 2500 + 1200
+            },
+            cohere: {
+                name: "Cohere",
+                generateResponse: (prompt) => `Cohere Response: ${prompt}\n\nCohere specializes in enterprise-grade NLP with strong language understanding. This response demonstrates robust text generation and analysis capabilities. The model is optimized for business applications and semantic search.`,
+                responseTime: () => Math.random() * 1600 + 800
+            },
+            palm: {
+                name: "PaLM 2",
+                generateResponse: (prompt) => `PaLM 2 Analysis: ${prompt}\n\nGoogle's PaLM 2 offers advanced reasoning and multilingual capabilities. This response showcases strong logical reasoning and code understanding. The model excels at complex tasks requiring step-by-step problem solving.`,
+                responseTime: () => Math.random() * 1700 + 900
+            }
+        };
+
+        function submitPrompt() {
+            const prompt = document.getElementById('promptInput').value;
+            if (!prompt.trim()) {
+                alert('Please enter a prompt!');
+                return;
+            }
+
+            const resultsSection = document.getElementById('resultsSection');
+            const loadingSection = document.getElementById('loadingSection');
+            const comparisonTools = document.getElementById('comparisonTools');
+            
+            resultsSection.innerHTML = '';
+            allResults = [];
+            loadingSection.classList.add('active');
+            comparisonTools.style.display = 'none';
+
+            const selectedAIs = [];
+            Object.keys(aiResponses).forEach(aiId => {
+                if (document.getElementById(aiId).checked) {
+                    selectedAIs.push(aiId);
+                }
+            });
+
+            if (selectedAIs.length === 0) {
+                alert('Please select at least one AI model!');
+                loadingSection.classList.remove('active');
+                return;
+            }
+
+            // Simulate API calls with different response times
+            selectedAIs.forEach((aiId, index) => {
+                const ai = aiResponses[aiId];
+                const responseTime = ai.responseTime();
+                
+                setTimeout(() => {
+                    const response = ai.generateResponse(prompt);
+                    const resultCard = createResultCard(ai.name, response, responseTime, aiId);
+                    resultsSection.appendChild(resultCard);
+                    
+                    allResults.push({
+                        element: resultCard,
+                        name: ai.name,
+                        response: response,
+                        time: responseTime,
+                        rating: 0
+                    });
+
+                    if (resultsSection.children.length === selectedAIs.length) {
+                        loadingSection.classList.remove('active');
+                        comparisonTools.style.display = 'block';
+                    }
+                }, responseTime);
+            });
+        }
+
+        function createResultCard(aiName, response, responseTime, aiId) {
+            const card = document.createElement('div');
+            card.className = 'ai-result-card';
+            card.dataset.aiId = aiId;
+            card.dataset.responseTime = responseTime;
+            card.dataset.responseLength = response.length;
+            
+            card.innerHTML = `
+                <div class="ai-header">
+                    <div class="ai-name">${aiName}</div>
+                    <div class="ai-rating" data-rating="0">
+                        ${[1,2,3,4,5].map(i => 
+                            `<span class="star" onclick="rateResponse('${aiId}', ${i})">☆</span>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="response-content">${response}</div>
+                <div class="response-meta">
+                    <span>⚡ ${(responseTime/1000).toFixed(2)}s</span>
+                    <span>📝 ${response.length} chars</span>
+                    <button class="copy-btn" onclick="copyResponse('${aiId}')">📋 Copy</button>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function rateResponse(aiId, rating) {
+            const card = document.querySelector(`[data-ai-id="${aiId}"]`);
+            const ratingDiv = card.querySelector('.ai-rating');
+            const stars = ratingDiv.querySelectorAll('.star');
+            
+            stars.forEach((star, index) => {
+                star.textContent = index < rating ? '⭐' : '☆';
+            });
+            
+            ratingDiv.dataset.rating = rating;
+            
+            // Update rating in allResults
+            const result = allResults.find(r => r.element.dataset.aiId === aiId);
+            if (result) {
+                result.rating = rating;
+            }
+        }
+
+        function copyResponse(aiId) {
+            const card = document.querySelector(`[data-ai-id="${aiId}"]`);
+            const content = card.querySelector('.response-content').textContent;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                const btn = card.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function filterResults(filter) {
+            const resultsSection = document.getElementById('resultsSection');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (filter === 'all') {
+                allResults.forEach(result => {
+                    result.element.style.display = 'block';
+                });
+            } else if (filter === 'fastest') {
+                const fastest = allResults.reduce((min, r) => 
+                    parseFloat(r.element.dataset.responseTime) < parseFloat(min.element.dataset.responseTime) ? r : min
+                );
+                allResults.forEach(result => {
+                    result.element.style.display = result === fastest ? 'block' : 'none';
+                });
+            } else if (filter === 'detailed') {
+                const mostDetailed = allResults.reduce((max, r) => 
+                    parseInt(r.element.dataset.responseLength) > parseInt(max.element.dataset.responseLength) ? r : max
+                );
+                allResults.forEach(result => {
+                    result.element.style.display = result === mostDetailed ? 'block' : 'none';
+                });
+            } else if (filter === 'concise') {
+                const mostConcise = allResults.reduce((min, r) => 
+                    parseInt(r.element.dataset.responseLength) < parseInt(min.element.dataset.responseLength) ? r : min
+                );
+                allResults.forEach(result => {
+                    result.element.style.display = result === mostConcise ? 'block' : 'none';
+                });
+            }
+        }
+
+        function sortByRating() {
+            const resultsSection = document.getElementById('resultsSection');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const sorted = [...allResults].sort((a, b) => b.rating - a.rating);
+            
+            resultsSection.innerHTML = '';
+            sorted.forEach(result => {
+                resultsSection.appendChild(result.element);
+            });
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('promptInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitPrompt();
+            }
+        });
+
+        // Add some example prompts on load
+        window.onload = function() {
+            const examples = [
+                "Explain quantum computing in simple terms",
+                "Write a Python function to find prime numbers",
+                "What are the benefits of meditation?",
+                "How does blockchain technology work?",
+                "Tips for improving productivity"
+            ];
+            
+            const randomExample = examples[Math.floor(Math.random() * examples.length)];
+            document.getElementById('promptInput').placeholder = `Enter your prompt here... (e.g., '${randomExample}')`;
+        };
+    </script>
+</body>
+</html>
